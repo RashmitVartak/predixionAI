@@ -25,6 +25,7 @@ class LiveKitDispatcher:
 
     async def dispatch_call(self, phone_no: str, user_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Dispatch a call to the specified phone number with user info"""
+        lkapi = None
         try:
             # Validate phone number
             if not isinstance(phone_no, str) or not phone_no.isdigit() or len(phone_no) != 10:
@@ -33,14 +34,15 @@ class LiveKitDispatcher:
             room_name = f"room-{phone_no}"
             formatted_phone = f"+91{phone_no}"
 
-            # Prepare metadata
+            # Prepare metadata (compatible with both field naming conventions)
             metadata = {
                 'phone': formatted_phone,
-                'first_name': user_info.get('F_Name', ''),
-                'last_name': user_info.get('L_Name', ''),
-                'current_balance': user_info.get('Current_balance', 0),
-                'installment_amount': user_info.get('Installment_Amount', 0),
-                'last_payment_date': user_info.get('Date_of_last_payment', ''),
+                'first_name': user_info.get('F_Name', user_info.get('first_name', '')),
+                'last_name': user_info.get('L_Name', user_info.get('last_name', '')),
+                'balance_to_pay': user_info.get('Current_balance', user_info.get('balance_to_pay', 0)),
+                'installment': user_info.get('Installment_Amount', user_info.get('installment', 0)),
+                'start_date': user_info.get('start_date', ''),
+                'last_date': user_info.get('Date_of_last_payment', user_info.get('last_date', '')),
                 'channel_preference': user_info.get('Channel_Preference', 'voice')
             }
 
@@ -76,7 +78,8 @@ class LiveKitDispatcher:
                 'status': 'success',
                 'room_name': room_name,
                 'dispatch_id': dispatch.id,
-                'phone': formatted_phone
+                'phone': formatted_phone,
+                'metadata': metadata
             }
 
         except Exception as e:
@@ -85,10 +88,8 @@ class LiveKitDispatcher:
             self._emit_status('failed', error_msg, phone_no)
             raise
         finally:
-            try:
+            if lkapi:
                 await lkapi.aclose()
-            except:
-                pass
 
     def _emit_status(self, status: str, message: str, phone: str, room: str = None):
         """Helper to emit status updates"""

@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import os
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import pandas as pd
 import asyncio
 import logging
@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='../frontend/build', static_url_path='/')
-CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+CORS(app, supports_credentials=True, origins=["*"])
 
 # Make sure this comes AFTER the CORS configuration
 socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000", async_mode='gevent')
@@ -105,7 +105,13 @@ def upload_csv():
             "message": str(e)
         }), 500
 
-@app.route("/dispatch-call", methods=["POST"])
+@app.route("/dispatch-call", methods=["POST","OPTIONS"])
+@cross_origin(
+    origins="http://localhost:3000",
+    supports_credentials=True,
+    methods=["POST", "OPTIONS"],
+    allow_headers=["Content-Type"]
+)
 @limiter
 async def handle_dispatch():  # Changed to async
     try:

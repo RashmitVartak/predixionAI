@@ -22,7 +22,7 @@ class SuperAgent:
             max_tokens=4096,
             temperature=0,
             max_retries=10,
-            api_key="VS4P743v31nDWbgUcwy3MJJ9zWk5mt1V"
+            api_key="A2szsJ1jllMb7cfu66WjErjobj1i1EqZ"
         )
 
         self.twillio_api='' #for connecting to voice agent

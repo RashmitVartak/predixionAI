@@ -73,7 +73,7 @@ class UserData:
 
 class Database:
     def __init__(self):
-        self.cred = credentials.Certificate("loanagent-29f87-firebase-adminsdk-fbsvc-d97d211892.json")
+        self.cred = credentials.Certificate("./conversational-ai-ab55c-firebase-adminsdk-fbsvc-e19783f081.json")
         try:
             firebase_admin.initialize_app(self.cred)
         except ValueError as e:
