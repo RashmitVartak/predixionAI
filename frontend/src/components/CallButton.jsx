@@ -65,44 +65,26 @@ const CallButton = ({ phone, borrower }) => {
 
       setCallProgress('Preparing call request...');
       const response = await fetch('http://localhost:5000/dispatch-call', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          phone: phoneNumber,
-          user_info: {
-            F_Name: borrower.F_Name,
-            L_Name: borrower.L_Name,
-            Current_balance: borrower.Current_balance,
-            Date_of_last_payment: borrower.Date_of_last_payment,
-            Installment_Amount: borrower.Installment_Amount,
-            Channel_Preference: borrower.Channel_Preference || 'voice'
-          }
-        }),
-      });
+      method: 'POST',
+      credentials: 'include', // This is what triggers the credentials requirement
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phone_no: phoneNumber,
+        user_info: borrower
+      }),
+    });
 
-      setCallProgress('Processing response...');
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Call initiation failed');
-      }
-
-      const data = await response.json();
-      setCallProgress('Call initiated - waiting for connection...');
-      
-      // The socket.io listener will handle further updates
-      return data;
-
-    } catch (error) {
-      console.error('Call error:', error);
-      setCallStatus('error');
-      setCallProgress(`Error: ${error.message}`);
-      setIsCalling(false);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    const data = await response.json();
+    // Handle success
+    } catch (error) {
+    console.error('Call error:', error);
+    // Handle error
+  }
   };
 
   return (
